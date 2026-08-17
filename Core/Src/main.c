@@ -18,6 +18,35 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define NB_BENCHMARKS 7
+
+// Benchmark sizes
+#define BENCH_NOOP_SIZE 10
+#define BENCH_PRIME_SIZE 5000
+#define BENCH_PRIME_SIZE_LPOSC 200
+#define BENCH_MAT_SIZE 43000
+#define NB_ITERATIONS_MAT_MUL 10
+#define NB_ITERATIONS_MAT_MUL_LPOSC 1
+#define NB_PCKS_TO_SEND_LORA 1
+
+// Benchmark correct results
+#define CORRECT_PRIME 669
+#define CORRECT_PRIME_LPOSC 46
+#define CORRECT_MAT_MUL 4294967295
+#define CORRECT_MAT_MUL_FLOAT_UPPER 0.525 
+#define CORRECT_MAT_MUL_FLOAT_LOWER 0.524 
+#define CORRECT_MAT_MUL_DOUBLE 0.5241578750190518665164063349948264658451080322265625
+
+// Constants
+const uint32_t US = 1000000;
+const uint32_t RESET_VAL = 0xDEADBEEF; 
+
+const int expe_pin = 11;
+extern float TIME_RATE;
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,6 +83,92 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//uint32_t compute_primes(uint32_t start, uint32_t end) {
+//	volatile uint32_t cpt = 0;
+//	uint32_t is_prime = 1;
+//	for (int k = start; k < end; k++) {
+//		is_prime = 1;
+//		for (int i = 2; i	< k; i++) {
+//			if (k%i==0) {
+//				is_prime = 0;
+//			}
+//		}
+//		if(is_prime == 1) {
+//			cpt += 1;
+//		}
+//	}
+//	return cpt;
+//}
+//
+//uint8_t benchmark_prime(uint32_t benchmark_size) {
+//	volatile uint32_t cpt = compute_primes(2, benchmark_size);
+//	uint8_t correct = 1;
+//	if(benchmark_size == 200 && cpt != CORRECT_PRIME_LPOSC) {
+//		correct = 0;
+//	}
+//	if(benchmark_size == 5000 && cpt != CORRECT_PRIME) {
+//		correct = 0;
+//	}
+//	return correct;
+//}
+//
+//uint8_t benchmark_mat_mul(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
+//	uint32_t A_value = 1UL<<16;
+//	uint32_t B_value = 1UL<<16;
+//	volatile uint8_t correct = 1;
+//	for (int k = 0; k < nb_iteration_mat_mul; k++) {
+//		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
+//		uint32_t *A = malloc(sizeof(uint32_t)*benchmark_size);
+//		uint32_t *B = malloc(sizeof(uint32_t)*benchmark_size);
+//		uint32_t *C = malloc(sizeof(uint32_t)*benchmark_size);
+//		for (int i = 0; i < benchmark_size; i++) {
+//			A[i] = A_value;
+//			B[i] = B_value;
+//		}
+//		for (int i = 0; i < benchmark_size; i++) {
+//			C[i] = A[i] * B[i] - 1;
+//		}
+//		// Verification
+//		for (int i = 0; i < benchmark_size; i++) {
+//			if(C[i] != CORRECT_MAT_MUL) {
+//				correct = 0;
+//			}
+//		}
+//		free(A);
+//		free(B);
+//		free(C);
+//	}
+//	return correct;
+//}
+//
+//uint8_t benchmark_mat_mul_float(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
+//	float A_value = 1.23456789;
+//	float B_value = 1.23456789;
+//	volatile uint8_t correct = 1;
+//	for (int k = 0; k < nb_iteration_mat_mul; k++) {
+//		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
+//		float *A = malloc(sizeof(float)*benchmark_size);
+//		float *B = malloc(sizeof(float)*benchmark_size);
+//		float *C = malloc(sizeof(float)*benchmark_size);
+//		for (int i = 0; i < benchmark_size; i++) {
+//			A[i] = A_value;
+//			B[i] = B_value;
+//		}
+//		for (int i = 0; i < benchmark_size; i++) {
+//			C[i] = A[i] * B[i] - 1;
+//		}
+//		// Verification
+//		for (int i = 0; i < benchmark_size; i++) {
+//			if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
+//				correct = 0;
+//			}
+//		}
+//		free(A);
+//		free(B);
+//		free(C);
+//	}
+//	return correct;
+//}
 
 /* USER CODE END 0 */
 
@@ -94,11 +209,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	printf("Hello world\n");
     /* USER CODE END WHILE */
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
-	HAL_Delay(3000);
+	HAL_Delay(2000);
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-	HAL_Delay(3000);
+	HAL_Delay(2000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

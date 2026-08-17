@@ -1,1 +1,6 @@
 Debug/*
+Release/*
+.cache/*
+.metadata/*
+.settings/*
+compile_commands.json
