@@ -95,92 +95,119 @@ PUTCHAR_PROTOTYPE
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//uint32_t compute_primes(uint32_t start, uint32_t end) {
-//	volatile uint32_t cpt = 0;
-//	uint32_t is_prime = 1;
-//	for (int k = start; k < end; k++) {
-//		is_prime = 1;
-//		for (int i = 2; i	< k; i++) {
-//			if (k%i==0) {
-//				is_prime = 0;
-//			}
-//		}
-//		if(is_prime == 1) {
-//			cpt += 1;
-//		}
-//	}
-//	return cpt;
-//}
-//
-//uint8_t benchmark_prime(uint32_t benchmark_size) {
-//	volatile uint32_t cpt = compute_primes(2, benchmark_size);
-//	uint8_t correct = 1;
-//	if(benchmark_size == 200 && cpt != CORRECT_PRIME_LPOSC) {
-//		correct = 0;
-//	}
-//	if(benchmark_size == 5000 && cpt != CORRECT_PRIME) {
-//		correct = 0;
-//	}
-//	return correct;
-//}
-//
-//uint8_t benchmark_mat_mul(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
-//	uint32_t A_value = 1UL<<16;
-//	uint32_t B_value = 1UL<<16;
-//	volatile uint8_t correct = 1;
-//	for (int k = 0; k < nb_iteration_mat_mul; k++) {
-//		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
-//		uint32_t *A = malloc(sizeof(uint32_t)*benchmark_size);
-//		uint32_t *B = malloc(sizeof(uint32_t)*benchmark_size);
-//		uint32_t *C = malloc(sizeof(uint32_t)*benchmark_size);
-//		for (int i = 0; i < benchmark_size; i++) {
-//			A[i] = A_value;
-//			B[i] = B_value;
-//		}
-//		for (int i = 0; i < benchmark_size; i++) {
-//			C[i] = A[i] * B[i] - 1;
-//		}
-//		// Verification
-//		for (int i = 0; i < benchmark_size; i++) {
-//			if(C[i] != CORRECT_MAT_MUL) {
-//				correct = 0;
-//			}
-//		}
-//		free(A);
-//		free(B);
-//		free(C);
-//	}
-//	return correct;
-//}
-//
-//uint8_t benchmark_mat_mul_float(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
-//	float A_value = 1.23456789;
-//	float B_value = 1.23456789;
-//	volatile uint8_t correct = 1;
-//	for (int k = 0; k < nb_iteration_mat_mul; k++) {
-//		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
-//		float *A = malloc(sizeof(float)*benchmark_size);
-//		float *B = malloc(sizeof(float)*benchmark_size);
-//		float *C = malloc(sizeof(float)*benchmark_size);
-//		for (int i = 0; i < benchmark_size; i++) {
-//			A[i] = A_value;
-//			B[i] = B_value;
-//		}
-//		for (int i = 0; i < benchmark_size; i++) {
-//			C[i] = A[i] * B[i] - 1;
-//		}
-//		// Verification
-//		for (int i = 0; i < benchmark_size; i++) {
-//			if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
-//				correct = 0;
-//			}
-//		}
-//		free(A);
-//		free(B);
-//		free(C);
-//	}
-//	return correct;
-//}
+uint32_t compute_primes(uint32_t start, uint32_t end) {
+	volatile uint32_t cpt = 0;
+	uint32_t is_prime = 1;
+	for (int k = start; k < end; k++) {
+		is_prime = 1;
+		for (int i = 2; i	< k; i++) {
+			if (k%i==0) {
+				is_prime = 0;
+			}
+		}
+		if(is_prime == 1) {
+			cpt += 1;
+		}
+	}
+	return cpt;
+}
+
+uint8_t benchmark_prime(uint32_t benchmark_size) {
+	volatile uint32_t cpt = compute_primes(2, benchmark_size);
+	uint8_t correct = 1;
+	if(benchmark_size == 200 && cpt != CORRECT_PRIME_LPOSC) {
+		correct = 0;
+	}
+	if(benchmark_size == 5000 && cpt != CORRECT_PRIME) {
+		correct = 0;
+	}
+	return correct;
+}
+
+uint8_t benchmark_mat_mul(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
+	uint32_t A_value = 1UL<<15;
+	uint32_t B_value = 1UL<<15;
+	volatile uint8_t correct = 1;
+	for (int k = 0; k < nb_iteration_mat_mul; k++) {
+		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
+		uint32_t *A = malloc(sizeof(uint32_t)*benchmark_size);
+		uint32_t *B = malloc(sizeof(uint32_t)*benchmark_size);
+		uint32_t *C = malloc(sizeof(uint32_t)*benchmark_size);
+		for (int i = 0; i < benchmark_size; i++) {
+			A[i] = A_value;
+			B[i] = B_value;
+			printf("B[i] %d\n", B[i]);
+		}
+		for (int i = 0; i < benchmark_size; i++) {
+			C[i] = A[i] * B[i];
+		}
+		printf("benchmark_mat_mul: C[0]: %d\n", C[0]);
+		//printf("benchmark_mat_mul: C[1000]: %d\n", C[1000]);
+		//printf("benchmark_mat_mul: C[42999]: %d\n", C[42999]);
+		free(A);
+		free(B);
+		free(C);
+	}
+	return correct;
+}
+
+uint8_t benchmark_mat_mul_float(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
+	float A_value = 1.23456789;
+	float B_value = 1.23456789;
+	volatile uint8_t correct = 1;
+	for (int k = 0; k < nb_iteration_mat_mul; k++) {
+		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
+		float *A = malloc(sizeof(float)*benchmark_size);
+		float *B = malloc(sizeof(float)*benchmark_size);
+		float *C = malloc(sizeof(float)*benchmark_size);
+		for (int i = 0; i < benchmark_size; i++) {
+			A[i] = A_value;
+			B[i] = B_value;
+		}
+		for (int i = 0; i < benchmark_size; i++) {
+			C[i] = A[i] * B[i] - 1;
+		}
+		// Verification
+		for (int i = 0; i < benchmark_size; i++) {
+			if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
+				correct = 0;
+			}
+		}
+		free(A);
+		free(B);
+		free(C);
+	}
+	return correct;
+}
+
+uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul) {
+	double A_value = 1.23456789;
+	double B_value = 1.23456789;
+	volatile uint8_t correct = 1;
+	for (int k = 0; k < nb_iteration_mat_mul; k++) {
+		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
+		double *A = malloc(sizeof(double)*benchmark_size);
+		double *B = malloc(sizeof(double)*benchmark_size);
+		double *C = malloc(sizeof(double)*benchmark_size);
+		for (int i = 0; i < benchmark_size; i++) {
+			A[i] = A_value;
+			B[i] = B_value;
+		}
+		for (int i = 0; i < benchmark_size; i++) {
+			C[i] = A[i] * B[i] - 1;
+		}
+		// Verification
+		for (int i = 0; i < benchmark_size; i++) {
+			if((double)C[i] != CORRECT_MAT_MUL_DOUBLE) {
+				correct = 0;
+			}
+		}
+		free(A);
+		free(B);
+		free(C);
+	}
+	return correct;
+}
 
 /* USER CODE END 0 */
 
@@ -220,15 +247,24 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	printf("Starting benchmarks\n");
+	//uint32_t res = benchmark_prime(BENCH_PRIME_SIZE);
+	//printf("prime - expected: %d, result: %d\n", CORRECT_PRIME, res);
+	uint32_t res = benchmark_mat_mul(BENCH_MAT_SIZE, 1);
+	printf("benchmark_mat_mul? %d \n", res);
+	//res = benchmark_mat_mul_float(BENCH_MAT_SIZE, 10);
+	//printf("benchmark_mat_mul_float? %d \n", res);
+	//res = benchmark_mat_mul_double(BENCH_MAT_SIZE, 10);
+	//printf("benchmark_mat_mul_double? %d \n", res);
   while (1)
   {
-	printf("Hello world\n");
-    /* USER CODE END WHILE */
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
-	HAL_Delay(2000);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-	HAL_Delay(2000);
-    /* USER CODE BEGIN 3 */
+		printf("prime - expected: %d, result: %d\n", CORRECT_PRIME, res);
+			/* USER CODE END WHILE */
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+		HAL_Delay(2000);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+		HAL_Delay(2000);
+			/* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
