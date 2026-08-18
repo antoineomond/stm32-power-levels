@@ -250,7 +250,9 @@ int main(void)
 	printf("Starting benchmarks\n");
 	//uint32_t res = benchmark_prime(BENCH_PRIME_SIZE);
 	//printf("prime - expected: %d, result: %d\n", CORRECT_PRIME, res);
-	uint32_t res = benchmark_mat_mul(BENCH_MAT_SIZE, 1);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res = benchmark_prime(BENCH_PRIME_SIZE);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
 	printf("benchmark_mat_mul? %d \n", res);
 	//res = benchmark_mat_mul_float(BENCH_MAT_SIZE, 10);
 	//printf("benchmark_mat_mul_float? %d \n", res);
@@ -259,12 +261,13 @@ int main(void)
   while (1)
   {
 		printf("prime - expected: %d, result: %d\n", CORRECT_PRIME, res);
-			/* USER CODE END WHILE */
+		/* USER CODE END WHILE */
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
 		HAL_Delay(2000);
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 		HAL_Delay(2000);
-			/* USER CODE BEGIN 3 */
+
+    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -362,12 +365,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
