@@ -9,9 +9,9 @@ library(grid)
 library(gridExtra)
 library(RColorBrewer)
 options(dplyr.print_max = 1e9, pillar.width = Inf)
-baseline_mapfunc <- function(lvls) { return(gsub("(C|V|L|z)\\.", "\\1 | ", lvls)) }
+baseline_mapfunc <- function(lvls) { return(gsub("(C|V|L|z|I|1|2|3)\\.", "\\1 | ", lvls)) }
 no_filter_f <- function(df_input) {
-	return(list(df_input, c(""), "result", baseline_mapfunc, "HSI.scale1.16MHz"))
+	return(list(df_input, c(""), "result", baseline_mapfunc, "HSI | scale1 | 16MHz"))
 }
 baseline_f <- function(df_input) {
 	df_input <- df_input %>%
