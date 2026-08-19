@@ -3,3 +3,11 @@ HSI,scale1,prime,5000,0,16000000
 HSI,scale1,mat_mul,5000,0,16000000
 HSI,scale1,mat_mul_float,5000,0,16000000
 HSI,scale1,mat_mul_double,5000,0,16000000
+HSI,scale2,prime,5000,0,16000000
+HSI,scale2,mat_mul,5000,0,16000000
+HSI,scale2,mat_mul_float,5000,0,16000000
+HSI,scale2,mat_mul_double,5000,0,16000000
+HSI,scale3,prime,5000,0,16000000
+HSI,scale3,mat_mul,5000,0,16000000
+HSI,scale3,mat_mul_float,5000,0,16000000
+HSI,scale3,mat_mul_double,5000,0,16000000

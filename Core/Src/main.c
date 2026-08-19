@@ -194,42 +194,9 @@ uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_
 	return correct;
 }
 
-/* USER CODE END 0 */
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART1_UART_Init();
-  /* USER CODE BEGIN 2 */
-	
-	// Wait 10s after having apply conf (all delay are noop)
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+void run_benchmarks() {
+	// Wait 10s after having apply conf (HAL_Delay is noop so active wait)
 	HAL_Delay(10000);
 	
 	// prime
@@ -262,6 +229,49 @@ int main(void)
 	printf("benchmark_mat_mul_float: %d \n", res_mat_mul_float);
 	printf("benchmark_mat_mul_double: %d \n", res_mat_mul_double);
 	#endif
+}
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART1_UART_Init();
+	
+  /* USER CODE BEGIN 2 */
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+	
+	run_benchmarks();
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+	run_benchmarks();
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+	run_benchmarks();
   /* USER CODE END 2 */
 
   /* Infinite loop */
