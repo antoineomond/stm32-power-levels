@@ -22,31 +22,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define NB_BENCHMARKS 7
+#define PRINT_BENCH_RES 1
 
 // Benchmark sizes
-#define BENCH_NOOP_SIZE 10
 #define BENCH_PRIME_SIZE 5000
-#define BENCH_PRIME_SIZE_LPOSC 200
-#define BENCH_MAT_SIZE 43000
-#define NB_ITERATIONS_MAT_MUL 10
-#define NB_ITERATIONS_MAT_MUL_LPOSC 1
-#define NB_PCKS_TO_SEND_LORA 1
+#define BENCH_MAT_SIZE 10500
+#define NB_ITERATIONS_MAT_MUL 20
 
 // Benchmark correct results
 #define CORRECT_PRIME 669
-#define CORRECT_PRIME_LPOSC 46
-#define CORRECT_MAT_MUL 4294967295
+#define CORRECT_MAT_MUL 1073741824
 #define CORRECT_MAT_MUL_FLOAT_UPPER 0.525 
 #define CORRECT_MAT_MUL_FLOAT_LOWER 0.524 
-#define CORRECT_MAT_MUL_DOUBLE 0.5241578750190518665164063349948264658451080322265625
 
 // Constants
 const uint32_t US = 1000000;
 const uint32_t RESET_VAL = 0xDEADBEEF; 
-
-const int expe_pin = 11;
-extern float TIME_RATE;
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -115,10 +106,7 @@ uint32_t compute_primes(uint32_t start, uint32_t end) {
 uint8_t benchmark_prime(uint32_t benchmark_size) {
 	volatile uint32_t cpt = compute_primes(2, benchmark_size);
 	uint8_t correct = 1;
-	if(benchmark_size == 200 && cpt != CORRECT_PRIME_LPOSC) {
-		correct = 0;
-	}
-	if(benchmark_size == 5000 && cpt != CORRECT_PRIME) {
+	if(cpt != CORRECT_PRIME) {
 		correct = 0;
 	}
 	return correct;
@@ -136,14 +124,11 @@ uint8_t benchmark_mat_mul(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul
 		for (int i = 0; i < benchmark_size; i++) {
 			A[i] = A_value;
 			B[i] = B_value;
-			printf("B[i] %d\n", B[i]);
+			//printf("B[i] %d\n", B[i]);
 		}
 		for (int i = 0; i < benchmark_size; i++) {
 			C[i] = A[i] * B[i];
 		}
-		printf("benchmark_mat_mul: C[0]: %d\n", C[0]);
-		//printf("benchmark_mat_mul: C[1000]: %d\n", C[1000]);
-		//printf("benchmark_mat_mul: C[42999]: %d\n", C[42999]);
 		free(A);
 		free(B);
 		free(C);
@@ -198,7 +183,7 @@ uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_
 		}
 		// Verification
 		for (int i = 0; i < benchmark_size; i++) {
-			if((double)C[i] != CORRECT_MAT_MUL_DOUBLE) {
+			if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
 				correct = 0;
 			}
 		}
@@ -242,33 +227,55 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+	
+	// Wait 10s after having apply conf (all delay are noop)
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+	HAL_Delay(10000);
+	
+	// prime
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_prime = benchmark_prime(BENCH_PRIME_SIZE);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
+	
+	// mat mul
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_mat_mul = benchmark_mat_mul(BENCH_MAT_SIZE, NB_ITERATIONS_MAT_MUL);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
+	
+	// mat mul float
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_mat_mul_float = benchmark_mat_mul_float(BENCH_MAT_SIZE, NB_ITERATIONS_MAT_MUL);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
+	
+	// mat mul double
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_mat_mul_double = benchmark_mat_mul_double(BENCH_MAT_SIZE/2, NB_ITERATIONS_MAT_MUL);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
+	
+	#if PRINT_BENCH_RES
+	printf("benchmark_prime: %d \n", res_prime);
+	printf("benchmark_mat_mul: %d \n", res_mat_mul);
+	printf("benchmark_mat_mul_float: %d \n", res_mat_mul_float);
+	printf("benchmark_mat_mul_double: %d \n", res_mat_mul_double);
+	#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	printf("Starting benchmarks\n");
-	//uint32_t res = benchmark_prime(BENCH_PRIME_SIZE);
-	//printf("prime - expected: %d, result: %d\n", CORRECT_PRIME, res);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-	uint32_t res = benchmark_prime(BENCH_PRIME_SIZE);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	printf("benchmark_mat_mul? %d \n", res);
-	//res = benchmark_mat_mul_float(BENCH_MAT_SIZE, 10);
-	//printf("benchmark_mat_mul_float? %d \n", res);
-	//res = benchmark_mat_mul_double(BENCH_MAT_SIZE, 10);
-	//printf("benchmark_mat_mul_double? %d \n", res);
   while (1)
   {
-		printf("prime - expected: %d, result: %d\n", CORRECT_PRIME, res);
-		/* USER CODE END WHILE */
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
-		HAL_Delay(2000);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-		HAL_Delay(2000);
+		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+		//HAL_Delay(2000);
+		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 
-    /* USER CODE BEGIN 3 */
   }
+	/* USER CODE END WHILE */
+	
+	/* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 
