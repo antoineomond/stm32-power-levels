@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define PRINT_BENCH_RES 1
+#define PRINT_BENCH_RES 0
 
 // Benchmark sizes
 #define BENCH_PRIME_SIZE 5000
@@ -264,20 +264,21 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 	
 	run_benchmarks();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
-	run_benchmarks();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
-	run_benchmarks();
+	NVIC_SystemReset();
+	//__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+	//run_benchmarks();
+	//__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+	//run_benchmarks();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
-		//HAL_Delay(2000);
-		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+		HAL_Delay(2000);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+		HAL_Delay(2000);
   }
     /* USER CODE END WHILE */
 
@@ -316,7 +317,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV16;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
