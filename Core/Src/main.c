@@ -69,17 +69,17 @@ const uint32_t RESET_VAL = 0xDEADBEEF;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-#ifdef __GNUC__
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif
-
-PUTCHAR_PROTOTYPE
-{
-  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-  return ch;
-}
+//#ifdef __GNUC__
+//#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+//#else
+//#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+//#endif
+//
+//PUTCHAR_PROTOTYPE
+//{
+//  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+//  return ch;
+//}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -396,8 +396,6 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
