@@ -11,7 +11,7 @@ library(RColorBrewer)
 options(dplyr.print_max = 1e9, pillar.width = Inf)
 baseline_mapfunc <- function(lvls) { return(gsub("(C|V|L|z|I|1|2|3)\\.", "\\1 | ", lvls)) }
 no_filter_f <- function(df_input) {
-	return(list(df_input, c(""), "result", baseline_mapfunc, "HSI | scale1 | 16MHz"))
+	return(list(df_input, c(""), "result", baseline_mapfunc, "HSI | scale3 | 16MHz"))
 }
 baseline_f <- function(df_input) {
 	df_input <- df_input %>%
@@ -46,6 +46,7 @@ for(expe in c(no_filter_f)) {
 #for(expe in c(no_filter_f)) {
 	res <- expe(df)
 	df_expe <- res[[1]]
+	df_expe <- df_expe %>% filter(clock_freq > 1000000)
 	level_names <- res[[2]]
 	pdf_name <- res[[3]]
 	mapfunc <- res[[4]]
@@ -66,7 +67,7 @@ for(expe in c(no_filter_f)) {
 		#group_by(clock_source, pll_vco_freq, clock_freq) %>%
 		group_by(clock_source, vreg_output, clock_freq) %>%
 		summarise(power_median = median(power_sample, na.rm = TRUE))
-	myColors <- c("black", "purple", "blue", "orange")
+	myColors <- c("black", "purple", "blue", "orange", "yellow", "green", "grey", "pink", "brown")
 	names(myColors) <- levels(df_expe$gp)
 	mtimestamp <- max(df_expe$current_timestamp, na.rm = TRUE)
 	p1 <- ggplot(df_expe , aes(x = current_timestamp, y = power_sample, color=gp, group=gp)) + 
@@ -78,7 +79,7 @@ for(expe in c(no_filter_f)) {
 		scale_y_continuous(n.breaks=15) +
 		labs(x = "Timestamp in seconds", y = "Power usage in mW", title = "") +
 		scale_colour_manual(name = "Configuration:", values = myColors, labels = res_mapping) +
-		guides(color = guide_legend(nrow = 1, byrow = TRUE)) + 
+		guides(color = guide_legend(nrow = 2, byrow = TRUE)) + 
 		theme(
 			aspect.ratio = 0.8,
 			plot.title = element_text(hjust = 0.5),
@@ -136,58 +137,58 @@ for(expe in c(no_filter_f)) {
 			total_energy = energy_mat_mul_double
 		)
 		
-	energy_consumption_table <- energy_consumption_table %>%
-		mutate(
-			gain_baseline = ((total_energy - energy_consumption_table[energy_consumption_table$gp == baseline_name, ]$total_energy) / energy_consumption_table[energy_consumption_table$gp == baseline_name, ]$total_energy) * 100
-		)
-	
-	energy_consumption_table <- energy_consumption_table %>%
-		rename(
-			"Clock" = clock_source,
-			"VREG" = vreg_output,
-			"Freq" = clock_freq,
-			"Prime (J)" = energy_prime_rel,
-			#"Prime multicores (J)" = energy_prime_multicores_rel,
-			"Mat mul int (J)" = energy_mat_mul_rel,
-			"Mat mul float (J)" = energy_mat_mul_float_rel,
-			"Mat mul double (J)" = energy_mat_mul_double_rel,
-			"Total energy (J)" = total_energy,
-			"% baseline (%)" = gain_baseline
-		)
-
-	# Color table
-	## default template + baseline in grey
-	content <- ifelse(energy_consumption_table$gp != baseline_name, ifelse(energy_consumption_table$row_num %% 2 == 0, "grey90", "grey95"), "grey75")
-	#content <- ifelse(energy_consumption_table$row_num == 0, "grey90", "grey95")
-	
-	## table per expe
-	#colors <- c("#AAAAAA", "#EEB8FF", "#B8B8FF", "#FFDC8A")
-	#content <- rep(colors, each = ncol(energy_consumption_table))
+	#energy_consumption_table <- energy_consumption_table %>%
+	#	mutate(
+	#		gain_baseline = ((total_energy - energy_consumption_table[energy_consumption_table$gp == baseline_name, ]$total_energy) / energy_consumption_table[energy_consumption_table$gp == baseline_name, ]$total_energy) * 100
+	#	)
 	#
-	## summary table
-	#colors <- c("#AAAAAA", "#EEB8FF", "#B8B8FF", "#FFDC8A")
-	#content <- rep(colors, each = ncol(energy_consumption_table))
-	
-	fill_matrix <- matrix(
-		content,
-		nrow = nrow(energy_consumption_table),
-		ncol = ncol(energy_consumption_table)
-	)
-	fill_matrix[, which(names(energy_consumption_table) == "% baseline (%)")-2] <-  # -2 because we are removing columns later, shifting the colors of matrix to the left 
-		ifelse(energy_consumption_table$`% baseline (%)` > 0, "#ffcccc",
-					 ifelse(energy_consumption_table$`% baseline (%)` < 0, "#ccffcc", fill_matrix))
-	tt <- ttheme_default(core = list(bg_params = list(fill = fill_matrix)))
-		
-	energy_consumption_table <- energy_consumption_table %>% select(-row_num, -gp) 
-	table_grob <- tableGrob(energy_consumption_table, rows = NULL, theme = tt)
-	table_with_title <- arrangeGrob(
-		textGrob(
-			"Energy consumption for each benchmark according to the configuration",
-			gp = gpar(fontsize = 14)
-		),
-		table_grob,
-		heights = c(0.1, 0.2)
-	)
+	#energy_consumption_table <- energy_consumption_table %>%
+	#	rename(
+	#		"Clock" = clock_source,
+	#		"VREG" = vreg_output,
+	#		"Freq" = clock_freq,
+	#		"Prime (J)" = energy_prime_rel,
+	#		#"Prime multicores (J)" = energy_prime_multicores_rel,
+	#		"Mat mul int (J)" = energy_mat_mul_rel,
+	#		"Mat mul float (J)" = energy_mat_mul_float_rel,
+	#		"Mat mul double (J)" = energy_mat_mul_double_rel,
+	#		"Total energy (J)" = total_energy,
+	#		"% baseline (%)" = gain_baseline
+	#	)
+
+	## Color table
+	### default template + baseline in grey
+	#content <- ifelse(energy_consumption_table$gp != baseline_name, ifelse(energy_consumption_table$row_num %% 2 == 0, "grey90", "grey95"), "grey75")
+	##content <- ifelse(energy_consumption_table$row_num == 0, "grey90", "grey95")
+	#
+	### table per expe
+	##colors <- c("#AAAAAA", "#EEB8FF", "#B8B8FF", "#FFDC8A")
+	##content <- rep(colors, each = ncol(energy_consumption_table))
+	##
+	### summary table
+	##colors <- c("#AAAAAA", "#EEB8FF", "#B8B8FF", "#FFDC8A")
+	##content <- rep(colors, each = ncol(energy_consumption_table))
+	#
+	#fill_matrix <- matrix(
+	#	content,
+	#	nrow = nrow(energy_consumption_table),
+	#	ncol = ncol(energy_consumption_table)
+	#)
+	#fill_matrix[, which(names(energy_consumption_table) == "% baseline (%)")-2] <-  # -2 because we are removing columns later, shifting the colors of matrix to the left 
+	#	ifelse(energy_consumption_table$`% baseline (%)` > 0, "#ffcccc",
+	#				 ifelse(energy_consumption_table$`% baseline (%)` < 0, "#ccffcc", fill_matrix))
+	#tt <- ttheme_default(core = list(bg_params = list(fill = fill_matrix)))
+	#	
+	#energy_consumption_table <- energy_consumption_table %>% select(-row_num, -gp) 
+	#table_grob <- tableGrob(energy_consumption_table, rows = NULL, theme = tt)
+	#table_with_title <- arrangeGrob(
+	#	textGrob(
+	#		"Energy consumption for each benchmark according to the configuration",
+	#		gp = gpar(fontsize = 14)
+	#	),
+	#	table_grob,
+	#	heights = c(0.1, 0.2)
+	#)
 	#pdf(paste(folder, pdf_name, "_table.pdf", sep=""), width = 15)
 	#grid.table(energy_consumption_table, rows = NULL, theme = tt)
 
