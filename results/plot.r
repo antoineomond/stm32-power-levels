@@ -25,7 +25,7 @@ MHz <- 1000000
 kHz <- 1000
 args <- commandArgs(trailingOnly = TRUE)
 folder <- args[1] 
-last_benchmark <- "prime"
+last_benchmark <- "mat_mul_double"
 name <- paste(folder, "results", sep="")
 df <- read.csv(paste(name, ".csv", sep=""))
 df <- df %>%

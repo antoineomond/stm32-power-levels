@@ -30,7 +30,7 @@
 // Benchmark sizes
 #define BENCH_PRIME_SIZE 5000
 #define BENCH_MAT_SIZE 10500
-#define NB_ITERATIONS_MAT_MUL 20
+#define NB_ITERATIONS_MAT_MUL 50
 
 // Benchmark correct results
 #define CORRECT_PRIME 669
@@ -550,25 +550,35 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
 	
+	// Enable ART 
+	__HAL_FLASH_PREFETCH_BUFFER_ENABLE();
+	//__HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
+	//__HAL_FLASH_DATA_CACHE_ENABLE();
+	
+	// Disable ART
+	//__HAL_FLASH_PREFETCH_BUFFER_DISABLE();
+	__HAL_FLASH_INSTRUCTION_CACHE_DISABLE();
+	__HAL_FLASH_DATA_CACHE_DISABLE();
+	
 	//run_benchmarks();
-	SystemClock_Config_PLL_60MHz(PWR_REGULATOR_VOLTAGE_SCALE3);
-	run_benchmarks();
-	SystemClock_Config_PLL_60MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
-	run_benchmarks();
-	SystemClock_Config_PLL_80MHz(PWR_REGULATOR_VOLTAGE_SCALE2);
-	run_benchmarks();
-	SystemClock_Config_PLL_80MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
-	run_benchmarks();
+	//SystemClock_Config_PLL_60MHz(PWR_REGULATOR_VOLTAGE_SCALE3);
+	//run_benchmarks();
+	//SystemClock_Config_PLL_60MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
+	//run_benchmarks();
+	//SystemClock_Config_PLL_80MHz(PWR_REGULATOR_VOLTAGE_SCALE2);
+	//run_benchmarks();
+	//SystemClock_Config_PLL_80MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
+	//run_benchmarks();
 	SystemClock_Config_PLL_100MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
 	run_benchmarks();
-	SystemClock_Config_PLL_16MHz(PWR_REGULATOR_VOLTAGE_SCALE3);
-	run_benchmarks();
-	SystemClock_Config_PLL_16MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
-	run_benchmarks();
-	SystemClock_Config_PLL_1MHz(PWR_REGULATOR_VOLTAGE_SCALE3);
-	run_benchmarks();
-	SystemClock_Config_PLL_1MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
-	run_benchmarks();
+	//SystemClock_Config_PLL_16MHz(PWR_REGULATOR_VOLTAGE_SCALE3);
+	//run_benchmarks();
+	//SystemClock_Config_PLL_16MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
+	//run_benchmarks();
+	//SystemClock_Config_PLL_1MHz(PWR_REGULATOR_VOLTAGE_SCALE3);
+	//run_benchmarks();
+	//SystemClock_Config_PLL_1MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
+	//run_benchmarks();
 	//SystemClock_Config_PLL_60MHz(PWR_REGULATOR_VOLTAGE_SCALE1);
 	//run_benchmarks();
 	//SystemClock_Config_PLL_60MHz(PWR_REGULATOR_VOLTAGE_SCALE2);

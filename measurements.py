@@ -18,7 +18,7 @@ deadline = time.time()
 start_time = time.time()
 timing_samples = []
 
-if(len(sys.argv) < 7):
+if(len(sys.argv) < 8):
     print("Missing args")
     exit()
 nb_expes = int(sys.argv[1])
@@ -27,6 +27,7 @@ offset = int(sys.argv[3]) # If there was other expes done before, just offset to
 live = int(sys.argv[4])
 NB_BENCHMARKS = int(sys.argv[5])
 DEADLINE_ITERATION = int(sys.argv[6])
+MAX_CURRENT = float(sys.argv[7])
 
 def next_expe(user_gpio, level, tick):
     global end_of_expe
@@ -68,7 +69,7 @@ ina228 = adafruit_ina228.INA228(i2c)
 print("INA calibration")
 
 # The shunt resistor is 1 Ohm
-ina228.set_calibration(7.5, 0.010)
+ina228.set_calibration(7.5, MAX_CURRENT)
 
 # Configuration of the INA: trade-off longer conversion time for better accuracy
 ina228.mode = adafruit_ina228.Mode.CONTINUOUS
