@@ -25,7 +25,8 @@ MHz <- 1000000
 kHz <- 1000
 args <- commandArgs(trailingOnly = TRUE)
 folder <- args[1] 
-last_benchmark <- "mat_mul_double"
+#last_benchmark <- "mat_mul_double"
+last_benchmark <- "prime"
 name <- paste(folder, "results", sep="")
 df <- read.csv(paste(name, ".csv", sep=""))
 df <- df %>%
@@ -46,7 +47,7 @@ for(expe in c(no_filter_f)) {
 #for(expe in c(no_filter_f)) {
 	res <- expe(df)
 	df_expe <- res[[1]]
-	df_expe <- df_expe %>% filter(clock_freq > 1000000)
+	df_expe <- df_expe %>% filter(clock_freq >= 1000000)
 	level_names <- res[[2]]
 	pdf_name <- res[[3]]
 	mapfunc <- res[[4]]
@@ -66,18 +67,19 @@ for(expe in c(no_filter_f)) {
 	power_summary <- df_expe %>%
 		#group_by(clock_source, pll_vco_freq, clock_freq) %>%
 		group_by(clock_source, vreg_output, clock_freq) %>%
-		summarise(power_median = median(power_sample, na.rm = TRUE))
+		summarise(power_median = mean(current_sample, na.rm = TRUE))
+
 	myColors <- c("black", "purple", "blue", "orange", "yellow", "green", "grey", "pink", "brown")
 	names(myColors) <- levels(df_expe$gp)
 	mtimestamp <- max(df_expe$current_timestamp, na.rm = TRUE)
-	p1 <- ggplot(df_expe , aes(x = current_timestamp, y = power_sample, color=gp, group=gp)) + 
+	p1 <- ggplot(df_expe , aes(x = current_timestamp, y = current_sample, color=gp, group=gp)) + 
 		geom_line(na.rm = TRUE) +
 		geom_hline(data = power_summary, aes(yintercept = power_median), linetype = "dashed") +
-		geom_label_repel(data = power_summary, aes(x=mtimestamp*1.05, y = power_median, label = paste(round(power_median,2), "mW")), hjust = "left", show.legend = FALSE, inherit.aes = FALSE, direction = "y") +
+		geom_label_repel(data = power_summary, aes(x=mtimestamp*1.05, y = power_median, label = paste(round(power_median,2), "mA")), hjust = "left", show.legend = FALSE, inherit.aes = FALSE, direction = "y") +
 		scale_x_continuous(expand = expansion(mult = c(0, 0.3))) +
 		#scale_y_continuous(n.breaks=15, limits = c(1, 18)) +
 		scale_y_continuous(n.breaks=15) +
-		labs(x = "Timestamp in seconds", y = "Power usage in mW", title = "") +
+		labs(x = "Timestamp in seconds", y = "Current drawn in mA", title = "Table 25") +
 		scale_colour_manual(name = "Configuration:", values = myColors, labels = res_mapping) +
 		guides(color = guide_legend(nrow = 2, byrow = TRUE)) + 
 		theme(
@@ -131,10 +133,10 @@ for(expe in c(no_filter_f)) {
 			gp = gp,
 			energy_prime_rel = round(energy_prime, 2), 
 #			#energy_prime_multicores_rel = round(energy_prime_multicores - energy_prime, 2), 
-			energy_mat_mul_rel = round(energy_mat_mul - energy_prime_rel, 2),
-			energy_mat_mul_float_rel = round(energy_mat_mul_float - energy_mat_mul, 2),
-			energy_mat_mul_double_rel = round(energy_mat_mul_double - energy_mat_mul_float, 2), 
-			total_energy = energy_mat_mul_double
+			#energy_mat_mul_rel = round(energy_mat_mul - energy_prime_rel, 2),
+			#energy_mat_mul_float_rel = round(energy_mat_mul_float - energy_mat_mul, 2),
+			#energy_mat_mul_double_rel = round(energy_mat_mul_double - energy_mat_mul_float, 2), 
+			total_energy = energy_prime
 		)
 		
 	#energy_consumption_table <- energy_consumption_table %>%
