@@ -1,16 +1,17 @@
 set -e
 
 # parameters
-EXPE_NAME=test
+EXPE_NAME=paper
 CONF_NAME=configurations.csv
 FILE_TO_DEPLOY='/home/aomond/research/projet_sensor_loic_2025/stm32/expes-power/Debug/expes-power.bin'
-NB_EXPES=5 # nb_confs * nb_benchmarks
+NB_EXPES=24 # nb_confs * nb_benchmarks
 NB_ITERS=3
-NB_BENCHMARKS=1
+NB_BENCHMARKS=4
 DEADLINE_ITERATION=3600
-MAX_CURRENT=0.030
+MAX_CURRENT=0.050
 PLOT_FILE=plot.r
 PDF_NAME=result.pdf
+GRAPH_TITLE="Paper"
 
 # launch experiment
 #cd build/ && picotool_DIR="/home/aomond/.local/bin/picotool-2.3.0-x86_64-lin/picotool" make -j4 && cd -
@@ -36,7 +37,7 @@ if [[ "$1" != "nomon" ]]; then
 	mkdir -p "results/$EXPE_NAME"
 	cp "results/$CONF_NAME" "results/$EXPE_NAME/configurations.csv"
 	scp raspberrypi:/root/dw_ina/results.csv "results/$EXPE_NAME/results.csv"
-	cd results && Rscript $PLOT_FILE "$EXPE_NAME/" && cd -
+	cd results && Rscript $PLOT_FILE "$EXPE_NAME/" "$GRAPH_TITLE"  && cd -
 
 	# show graph
 	echo "Showing results/$EXPE_NAME/$PDF_NAME"

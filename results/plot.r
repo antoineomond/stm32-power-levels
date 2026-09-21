@@ -25,6 +25,7 @@ MHz <- 1000000
 kHz <- 1000
 args <- commandArgs(trailingOnly = TRUE)
 folder <- args[1] 
+graph_title <- args[2] 
 #last_benchmark <- "mat_mul_double"
 last_benchmark <- "prime"
 name <- paste(folder, "results", sep="")
@@ -67,7 +68,7 @@ for(expe in c(no_filter_f)) {
 	power_summary <- df_expe %>%
 		#group_by(clock_source, pll_vco_freq, clock_freq) %>%
 		group_by(clock_source, vreg_output, clock_freq) %>%
-		summarise(power_median = mean(current_sample, na.rm = TRUE))
+		summarise(power_median = median(current_sample, na.rm = TRUE))
 
 	myColors <- c("black", "purple", "blue", "orange", "yellow", "green", "grey", "pink", "brown")
 	names(myColors) <- levels(df_expe$gp)
@@ -79,7 +80,7 @@ for(expe in c(no_filter_f)) {
 		scale_x_continuous(expand = expansion(mult = c(0, 0.3))) +
 		#scale_y_continuous(n.breaks=15, limits = c(1, 18)) +
 		scale_y_continuous(n.breaks=15) +
-		labs(x = "Timestamp in seconds", y = "Current drawn in mA", title = "Table 25") +
+		labs(x = "Timestamp in seconds", y = "Current drawn in mA", title = graph_title) +
 		scale_colour_manual(name = "Configuration:", values = myColors, labels = res_mapping) +
 		guides(color = guide_legend(nrow = 2, byrow = TRUE)) + 
 		theme(
