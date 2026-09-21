@@ -25,8 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define PRINT_BENCH_RES 1
-
 // Benchmark sizes
 #define BENCH_PRIME_SIZE 50000
 #define BENCH_MAT_SIZE 10500
@@ -68,19 +66,6 @@ const uint32_t RESET_VAL = 0xDEADBEEF;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-/* USER CODE BEGIN PFP */
-//#ifdef __GNUC__
-//#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-//#else
-//#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-//#endif
-//
-//PUTCHAR_PROTOTYPE
-//{
-//  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-//  return ch;
-//}
-/* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
@@ -195,21 +180,19 @@ uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_
 
 void run_benchmarks() {
 	// Wait 10s after having apply conf (HAL_Delay is noop so active wait)
-	HAL_Delay(2000);
+	HAL_Delay(5000);
 	
 	// prime
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-	//uint32_t res_prime = benchmark_prime(BENCH_PRIME_SIZE);
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	//HAL_Delay(100);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_prime = benchmark_prime(BENCH_PRIME_SIZE);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
 	
 	// mat mul
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-	//uint32_t res_mat_mul = benchmark_mat_mul(BENCH_MAT_SIZE, NB_ITERATIONS_MAT_MUL);
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	//HAL_Delay(100);
-	
-	//return;
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_mat_mul = benchmark_mat_mul(BENCH_MAT_SIZE, NB_ITERATIONS_MAT_MUL);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
 	
 	// mat mul float
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
@@ -218,19 +201,12 @@ void run_benchmarks() {
 	HAL_Delay(100);
 	
 	// mat mul double
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
-	//uint32_t res_mat_mul_double = benchmark_mat_mul_double(BENCH_MAT_SIZE/2, NB_ITERATIONS_MAT_MUL);
-	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	//HAL_Delay(100);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+	uint32_t res_mat_mul_double = benchmark_mat_mul_double(BENCH_MAT_SIZE/2, NB_ITERATIONS_MAT_MUL);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
 	
 	return;
-	
-	#if PRINT_BENCH_RES
-	//printf("benchmark_prime: %d \n", res_prime);
-	//printf("benchmark_mat_mul: %d \n", res_mat_mul);
-	//printf("benchmark_mat_mul_float: %d \n", res_mat_mul_float);
-	//printf("benchmark_mat_mul_double: %d \n", res_mat_mul_double);
-	#endif
 }
 
 /* USER CODE END 0 */
@@ -265,45 +241,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-	__HAL_FLASH_PREFETCH_BUFFER_DISABLE();
-	__HAL_FLASH_INSTRUCTION_CACHE_DISABLE();
-	__HAL_FLASH_DATA_CACHE_DISABLE();
-	//__HAL_FLASH_PREFETCH_BUFFER_ENABLE();
-	//__HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
-	//__HAL_FLASH_DATA_CACHE_ENABLE();
-	//printf("test\n");
 	while(1){
 		run_benchmarks();
-		//uint32_t hclk_freq = HAL_RCC_GetHCLKFreq();
-		//printf("hclk_freq: %d\n", hclk_freq); 
-		//uint32_t pclk1_freq = HAL_RCC_GetPCLK1Freq();
-		//printf("pclk1_freq: %d\n", pclk1_freq); 
-		//uint32_t pclk2_freq = HAL_RCC_GetPCLK2Freq();
-		//printf("pclk2_freq: %d\n", pclk2_freq); 
-		//printf("\n");
-		//HAL_Delay(1000);
+		HAL_Delay(1000);
 	}
-	
-	run_benchmarks();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
-	run_benchmarks();
-	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
-	run_benchmarks();
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
-		//HAL_Delay(2000);
-		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-
-  }
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  /* USER CODE END 3 */
 }
 
 /**
@@ -318,7 +259,7 @@ void SystemClock_Config(void)
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -326,7 +267,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -337,11 +278,11 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV16;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -365,6 +306,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : PC13 PC14 PC15 */
   GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -378,15 +322,22 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA0 PA1 PA2 PA3
-                           PA4 PA5 PA6 PA7
-                           PA8 PA9 PA10 PA11
-                           PA12 PA13 PA14 PA15 */
+                           PA4 PA6 PA7 PA8
+                           PA9 PA10 PA11 PA12
+                           PA13 PA14 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
-                          |GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+                          |GPIO_PIN_4|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8
+                          |GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12
+                          |GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB0 PB1 PB2 PB10
@@ -400,14 +351,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
-  //GPIO_InitStruct.Pin = GPIO_PIN_13;
-  //GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  //GPIO_InitStruct.Pull = GPIO_PULLUP;
-  //HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
