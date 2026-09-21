@@ -4,7 +4,7 @@ set -e
 EXPE_NAME=paper
 CONF_NAME=configurations.csv
 FILE_TO_DEPLOY='/home/aomond/research/projet_sensor_loic_2025/stm32/expes-power/Debug/expes-power.bin'
-NB_EXPES=24 # nb_confs * nb_benchmarks
+NB_EXPES=32 # nb_confs * nb_benchmarks
 NB_ITERS=3
 NB_BENCHMARKS=4
 DEADLINE_ITERATION=3600

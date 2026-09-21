@@ -15,10 +15,26 @@ no_filter_f <- function(df_input) {
 }
 baseline_f <- function(df_input) {
 	df_input <- df_input %>%
-		filter(clock_source %in% c("PLL", "XOSC", "ROSC")) %>%
-		filter(vreg_output %in% c("1.10V")) %>%
-		filter(clock_freq %/% 1000000 %in% c(150, 12, 11))
-	return(list(df_input, c("PLL", "XOSC", "ROSC"), "baseline", baseline_mapfunc, "PLL | 1.10V | 150MHz"))
+		filter((clock_source == "HSI" & vreg_output == "scale3") 
+				 | (clock_source == "HSE" & vreg_output == "scale3")
+				 | (clock_source == "PLL" & vreg_output == "scale1")) %>%
+		filter(clock_freq %/% 1000000 %in% c(64, 25, 16))
+	return(list(df_input, c("HSI", "HSE", "PLL"), "baseline", baseline_mapfunc, "HSI | scale3 | 16MHz"))
+}
+minimum_freq <- function(df_input) {
+	df_input <- df_input %>%
+		filter((clock_source == "HSI" & vreg_output == "scale3") 
+				 | (clock_source == "HSE" & vreg_output == "scale3")
+				 | (clock_source == "PLL" & vreg_output == "scale1")) %>%
+		filter(clock_freq %/% 1000000 %in% c(1, 20))
+	return(list(df_input, c("HSI", "HSE", "PLL"), "minimums-freq", baseline_mapfunc, "HSI | scale3 | 16MHz"))
+}
+minimum_vreg <- function(df_input) {
+	df_input <- df_input %>%
+		filter((clock_source == "PLL" & vreg_output == "scale1") 
+				 | (clock_source == "PLL" & vreg_output == "scale3")) %>% 
+		filter(clock_freq %/% 1000000 %in% c(64, 20))
+	return(list(df_input, c("PLL"), "minimums-vreg", baseline_mapfunc, "PLL | scale1 | 64MHz"))
 }
 
 MHz <- 1000000
@@ -43,7 +59,7 @@ df <- df %>%
 
 #for(expe in c(baseline_f, pll_f, rosc_f, xosc_f, lposc_dft_f, lposc_max_f, lposc_min_f)) {
 #for(expe in c(baseline_f, pll_f, rosc_f, xosc_f)) {
-for(expe in c(no_filter_f)) {
+for(expe in c(baseline_f, minimum_freq, minimum_vreg)) {
 #for(expe in c(xosc_f, lposc_dft_f, lposc_max_f, lposc_min_f)) {
 #for(expe in c(no_filter_f)) {
 	res <- expe(df)
