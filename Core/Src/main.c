@@ -621,6 +621,116 @@ void SystemClock_Config_PLL_20MHz_minvreg(void)
   }
 }
 
+void SystemClock_Config_PLL_1MHz(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 64;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV64;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+void SystemClock_Config_PLL_1MHz_minvreg(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 64;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV64;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 static void MX_GPIO_Init_pull_downs(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -698,7 +808,7 @@ uint32_t compute_primes(uint32_t start, uint32_t end) {
 
 uint8_t benchmark_prime(uint32_t benchmark_size) {
 	volatile uint32_t cpt = compute_primes(2, benchmark_size);
-	uint8_t correct = 1;
+	volatile uint8_t correct = 1;
 	if(cpt != CORRECT_PRIME) {
 		correct = 0;
 	}
@@ -739,9 +849,9 @@ uint8_t benchmark_mat_mul_float(uint32_t benchmark_size, uint32_t nb_iteration_m
 	float A_value = 1.23456789;
 	float B_value = 1.23456789;
 	volatile uint8_t correct = 1;
-	float *A = malloc(sizeof(float)*benchmark_size);
-	float *B = malloc(sizeof(float)*benchmark_size);
-	float *C = malloc(sizeof(float)*benchmark_size);
+	volatile float *A = malloc(sizeof(float)*benchmark_size);
+	volatile float *B = malloc(sizeof(float)*benchmark_size);
+	volatile float *C = malloc(sizeof(float)*benchmark_size);
 	for (int i = 0; i < benchmark_size; i++) {
 		A[i] = A_value;
 		B[i] = B_value;
@@ -759,9 +869,9 @@ uint8_t benchmark_mat_mul_float(uint32_t benchmark_size, uint32_t nb_iteration_m
 			correct = 0;
 		}
 	}
-	free(A);
-	free(B);
-	free(C);
+	free((void*)A);
+	free((void*)B);
+	free((void*)C);
 	return correct;
 }
 
@@ -769,9 +879,9 @@ uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_
 	double A_value = 1.23456789;
 	double B_value = 1.23456789;
 	volatile uint8_t correct = 1;
-	double *A = malloc(sizeof(double)*benchmark_size);
-	double *B = malloc(sizeof(double)*benchmark_size);
-	double *C = malloc(sizeof(double)*benchmark_size);
+	volatile double *A = malloc(sizeof(double)*benchmark_size);
+	volatile double *B = malloc(sizeof(double)*benchmark_size);
+	volatile double *C = malloc(sizeof(double)*benchmark_size);
 	for (int i = 0; i < benchmark_size; i++) {
 		A[i] = A_value;
 		B[i] = B_value;
@@ -790,9 +900,9 @@ uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_
 			correct = 0;
 		}
 	}
-	free(A);
-	free(B);
-	free(C);
+	free((void*)A);
+	free((void*)B);
+	free((void*)C);
 	return correct;
 }
 
@@ -837,6 +947,8 @@ int main(void)
   /* USER CODE BEGIN Init */
   MX_GPIO_Init_pull_downs();
   /* USER CODE END Init */
+	
+	HAL_Delay(20000);
 
   /* USER CODE BEGIN SysInit */
 	// Baseline
@@ -863,7 +975,7 @@ int main(void)
   SystemClock_Config_HSE_156250000Hz();
 	run_benchmarks();
 	HAL_Delay(1000);
-  SystemClock_Config_PLL_20MHz_default();
+  SystemClock_Config_PLL_1MHz();
 	run_benchmarks();
 	HAL_Delay(1000);
 	
@@ -876,7 +988,7 @@ int main(void)
   //SystemClock_Config_PLL_46875Hz_minvreg();
 	//run_benchmarks();
 	//HAL_Delay(1000);
-  SystemClock_Config_PLL_20MHz_minvreg();
+  SystemClock_Config_PLL_1MHz_minvreg();
 	run_benchmarks();
 	HAL_Delay(1000);
 
@@ -894,46 +1006,6 @@ int main(void)
 
 	/* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
-}
-
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV16;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-  {
-    Error_Handler();
-  }
 }
 
 /* USER CODE BEGIN 4 */

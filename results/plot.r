@@ -26,14 +26,14 @@ minimum_freq <- function(df_input) {
 		filter((clock_source == "HSI" & vreg_output == "scale3") 
 				 | (clock_source == "HSE" & vreg_output == "scale3")
 				 | (clock_source == "PLL" & vreg_output == "scale1")) %>%
-		filter(clock_freq %/% 1000000 %in% c(1, 20))
+		filter(clock_freq %/% 1000000 %in% c(1))
 	return(list(df_input, c("HSI", "HSE", "PLL"), "minimums-freq", baseline_mapfunc, "HSI | scale3 | 16MHz"))
 }
 minimum_vreg <- function(df_input) {
 	df_input <- df_input %>%
 		filter((clock_source == "PLL" & vreg_output == "scale1") 
 				 | (clock_source == "PLL" & vreg_output == "scale3")) %>% 
-		filter(clock_freq %/% 1000000 %in% c(64, 20))
+		filter(clock_freq %/% 1000000 %in% c(64, 1))
 	return(list(df_input, c("PLL"), "minimums-vreg", baseline_mapfunc, "PLL | scale1 | 64MHz"))
 }
 
