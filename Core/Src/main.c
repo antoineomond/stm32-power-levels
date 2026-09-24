@@ -709,23 +709,29 @@ uint8_t benchmark_mat_mul(uint32_t benchmark_size, uint32_t nb_iteration_mat_mul
 	uint32_t A_value = 1UL<<15;
 	uint32_t B_value = 1UL<<15;
 	volatile uint8_t correct = 1;
+	volatile uint32_t *A = malloc(sizeof(uint32_t)*benchmark_size);
+	volatile uint32_t *B = malloc(sizeof(uint32_t)*benchmark_size);
+	volatile uint32_t *C = malloc(sizeof(uint32_t)*benchmark_size);
+	for (int i = 0; i < benchmark_size; i++) {
+		A[i] = A_value;
+		B[i] = B_value;
+	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	for (int k = 0; k < nb_iteration_mat_mul; k++) {
-		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
-		uint32_t *A = malloc(sizeof(uint32_t)*benchmark_size);
-		uint32_t *B = malloc(sizeof(uint32_t)*benchmark_size);
-		uint32_t *C = malloc(sizeof(uint32_t)*benchmark_size);
-		for (int i = 0; i < benchmark_size; i++) {
-			A[i] = A_value;
-			B[i] = B_value;
-			//printf("B[i] %d\n", B[i]);
-		}
 		for (int i = 0; i < benchmark_size; i++) {
 			C[i] = A[i] * B[i];
 		}
-		free(A);
-		free(B);
-		free(C);
 	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	// Verification
+	for (int i = 0; i < benchmark_size; i++) {
+		if(C[i] != CORRECT_MAT_MUL) {
+			correct = 0;
+		}
+	}
+	free((void*)A);
+	free((void*)B);
+	free((void*)C);
 	return correct;
 }
 
@@ -733,28 +739,29 @@ uint8_t benchmark_mat_mul_float(uint32_t benchmark_size, uint32_t nb_iteration_m
 	float A_value = 1.23456789;
 	float B_value = 1.23456789;
 	volatile uint8_t correct = 1;
+	float *A = malloc(sizeof(float)*benchmark_size);
+	float *B = malloc(sizeof(float)*benchmark_size);
+	float *C = malloc(sizeof(float)*benchmark_size);
+	for (int i = 0; i < benchmark_size; i++) {
+		A[i] = A_value;
+		B[i] = B_value;
+	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	for (int k = 0; k < nb_iteration_mat_mul; k++) {
-		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
-		float *A = malloc(sizeof(float)*benchmark_size);
-		float *B = malloc(sizeof(float)*benchmark_size);
-		float *C = malloc(sizeof(float)*benchmark_size);
-		for (int i = 0; i < benchmark_size; i++) {
-			A[i] = A_value;
-			B[i] = B_value;
-		}
 		for (int i = 0; i < benchmark_size; i++) {
 			C[i] = A[i] * B[i] - 1;
 		}
-		// Verification
-		for (int i = 0; i < benchmark_size; i++) {
-			if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
-				correct = 0;
-			}
-		}
-		free(A);
-		free(B);
-		free(C);
 	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	// Verification
+	for (int i = 0; i < benchmark_size; i++) {
+		if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
+			correct = 0;
+		}
+	}
+	free(A);
+	free(B);
+	free(C);
 	return correct;
 }
 
@@ -762,34 +769,34 @@ uint8_t benchmark_mat_mul_double(uint32_t benchmark_size, uint32_t nb_iteration_
 	double A_value = 1.23456789;
 	double B_value = 1.23456789;
 	volatile uint8_t correct = 1;
+	double *A = malloc(sizeof(double)*benchmark_size);
+	double *B = malloc(sizeof(double)*benchmark_size);
+	double *C = malloc(sizeof(double)*benchmark_size);
+	for (int i = 0; i < benchmark_size; i++) {
+		A[i] = A_value;
+		B[i] = B_value;
+	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	for (int k = 0; k < nb_iteration_mat_mul; k++) {
-		// Three 32-bits matrixes of 72 elements account for 486 kB, which should account for all 8 memory banks in SRAM0 and SRAM1
-		double *A = malloc(sizeof(double)*benchmark_size);
-		double *B = malloc(sizeof(double)*benchmark_size);
-		double *C = malloc(sizeof(double)*benchmark_size);
-		for (int i = 0; i < benchmark_size; i++) {
-			A[i] = A_value;
-			B[i] = B_value;
-		}
 		for (int i = 0; i < benchmark_size; i++) {
 			C[i] = A[i] * B[i] - 1;
 		}
-		// Verification
-		for (int i = 0; i < benchmark_size; i++) {
-			if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
-				correct = 0;
-			}
-		}
-		free(A);
-		free(B);
-		free(C);
 	}
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+	HAL_Delay(100);
+	// Verification
+	for (int i = 0; i < benchmark_size; i++) {
+		if(C[i] > CORRECT_MAT_MUL_FLOAT_UPPER || C[i] < CORRECT_MAT_MUL_FLOAT_LOWER) {
+			correct = 0;
+		}
+	}
+	free(A);
+	free(B);
+	free(C);
 	return correct;
 }
 
-
 void run_benchmarks() {
-	// Wait 10s after having apply conf (HAL_Delay is noop so active wait)
 	HAL_Delay(5000);
 	
 	// prime
@@ -799,23 +806,13 @@ void run_benchmarks() {
 	HAL_Delay(100);
 	
 	// mat mul
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	uint32_t res_mat_mul = benchmark_mat_mul(BENCH_MAT_SIZE, NB_ITERATIONS_MAT_MUL);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	HAL_Delay(100);
 	
 	// mat mul float
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	uint32_t res_mat_mul_float = benchmark_mat_mul_float(BENCH_MAT_SIZE, NB_ITERATIONS_MAT_MUL);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	HAL_Delay(100);
 	
 	// mat mul double
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
 	uint32_t res_mat_mul_double = benchmark_mat_mul_double(BENCH_MAT_SIZE/2, NB_ITERATIONS_MAT_MUL);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
-	HAL_Delay(100);
-	
 	return;
 }
 
