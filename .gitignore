@@ -5,6 +5,6 @@ Release/*
 .settings/*
 compile_commands.json
 results/*
-!results/plot.r
+!results/*.r
 !results/configurations.csv
 !results/paper_*

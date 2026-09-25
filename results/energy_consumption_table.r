@@ -1,0 +1,178 @@
+library("ggplot2")
+library("ggrepel")
+library("dplyr")
+library(rlang)
+library(patchwork)
+library(stringr)
+library(tidyr)
+library(grid)
+library(gridExtra)
+library(RColorBrewer)
+options(dplyr.print_max = 1e9, pillar.width = Inf)
+baseline_mapfunc <- function(lvls) { return(gsub("(C|V|L|z|I|1|2|3)\\.", "\\1 | ", lvls)) }
+no_filter_f <- function(df_input) {
+	return(list(df_input, c(""), "result", baseline_mapfunc, "HSI | scale3 | 16MHz"))
+}
+baseline_f <- function(df_input) {
+	df_input <- df_input %>%
+		filter((clock_source == "HSI" & vreg_output == "scale3") 
+				 | (clock_source == "HSE" & vreg_output == "scale3")
+				 | (clock_source == "PLL" & vreg_output == "scale1")) %>%
+		filter(clock_freq %/% 1000000 %in% c(64, 25, 16))
+	return(list(df_input, c("HSI", "HSE", "PLL"), "baseline", baseline_mapfunc, "HSI | scale3 | 16MHz"))
+}
+minimum_freq <- function(df_input) {
+	df_input <- df_input %>%
+		filter((clock_source == "HSI" & vreg_output == "scale3") 
+				 | (clock_source == "HSE" & vreg_output == "scale3")
+				 | (clock_source == "PLL" & vreg_output == "scale1")) %>%
+		filter(clock_freq %/% 1000000 %in% c(1))
+	return(list(df_input, c("HSI", "HSE", "PLL"), "minimums-freq", baseline_mapfunc, "HSI | scale3 | 16MHz"))
+}
+minimum_vreg <- function(df_input) {
+	df_input <- df_input %>%
+		filter((clock_source == "PLL" & vreg_output == "scale1") 
+				 | (clock_source == "PLL" & vreg_output == "scale3")) %>% 
+		filter(clock_freq %/% 1000000 %in% c(64, 1))
+	return(list(df_input, c("PLL"), "minimums-vreg", baseline_mapfunc, "PLL | scale1 | 64MHz"))
+}
+
+MHz <- 1000000
+kHz <- 1000
+args <- commandArgs(trailingOnly = TRUE)
+folder <- args[1] 
+graph_title <- args[2] 
+last_benchmark <- "mat_mul_double"
+name <- paste(folder, "results", sep="")
+df <- read.csv(paste(name, ".csv", sep=""))
+df <- df %>%
+  mutate(config_row = expe_num + 1)
+print(paste(folder, "configurations.csv", sep=""))
+parameters <- read.csv(paste(folder, "configurations.csv", sep=""))
+df <- df %>%
+	left_join(
+		parameters %>% mutate(config_row = row_number()),
+		by = "config_row"
+	) %>%
+	select(-config_row)
+
+#for(expe in c(baseline_f, pll_f, rosc_f, xosc_f, lposc_dft_f, lposc_max_f, lposc_min_f)) {
+#for(expe in c(baseline_f, pll_f, rosc_f, xosc_f)) {
+for(expe in c(no_filter_f)) {
+#for(expe in c(xosc_f, lposc_dft_f, lposc_max_f, lposc_min_f)) {
+#for(expe in c(no_filter_f)) {
+	res <- expe(df)
+	df_expe <- res[[1]]
+	df_expe <- df_expe %>% filter(clock_freq >= 1000000)
+	level_names <- res[[2]]
+	pdf_name <- res[[3]]
+	mapfunc <- res[[4]]
+	baseline_name <- res[[5]]
+	unit <- ifelse(df_expe$clock_freq < MHz, "kHz", "MHz")
+	div  <- ifelse(df_expe$clock_freq < MHz, kHz, MHz)
+	#df_expe$gp <- interaction(df_expe$clock_source, paste(round(df_expe$pll_vco_freq/div, 1), "MHz", sep=""), paste(round(df_expe$clock_freq/div, 1), unit, sep=""))
+	df_expe$gp <- interaction(df_expe$clock_source, df_expe$vreg_output, paste(round(df_expe$clock_freq/div, 1), unit, sep=""))
+	lvls <- levels(df_expe$gp)
+	res_mapping <- setNames(mapfunc(lvls), lvls)
+	df_expe$clock_source <- factor(df_expe$clock_source, levels = c("HSI", "HSE", "PLL"))
+	df_expe$vreg_output <- factor(df_expe$vreg_output, levels = c("scale3", "scale2", "scale1"))
+	#df_expe$gp <- factor(df_expe$gp, levels = unique(df_expe$gp[order(df_expe$clock_source, df_expe$pll_vco_freq, -df_expe$clock_freq)]))
+	df_expe$gp <- factor(df_expe$gp, levels = unique(df_expe$gp[order(df_expe$clock_source, df_expe$vreg_output, -df_expe$clock_freq)]))
+	
+	# energy per benchmark table
+	energy_consumption_table <- df_expe %>%
+		filter(!is.na(energy_sample)) %>%
+		group_by(iteration_num, expe_num) %>%
+		slice_tail(n = 1) %>%   # last value per iteration/expe_num
+		ungroup() %>%
+		group_by(expe_num) %>%
+		reframe(clock_source = clock_source, vreg_output = vreg_output, clock_freq = clock_freq, gp = baseline_mapfunc(gp), benchmark_name = benchmark_name, avg_energy = mean(energy_sample), std_energy = sd(energy_sample), avg_time = mean(current_timestamp), std_time = sd(current_timestamp), .groups = "drop") %>%
+		distinct()
+	
+	energy_consumption_table <- energy_consumption_table %>%
+		pivot_wider(
+			id_cols = c(clock_source, vreg_output, clock_freq, gp),
+			names_from = benchmark_name,
+			values_from = avg_energy,
+			names_prefix = "energy_"
+		) %>%
+		reframe(
+			row_num = row_number(),
+			clock_source = clock_source,
+			vreg_output = vreg_output,
+			clock_freq = paste(round(clock_freq / ifelse(clock_freq < MHz, kHz, MHz), 1), ifelse(clock_freq < MHz, "kHz", "MHz")),
+			gp = gp,
+			energy_prime_rel = round(energy_prime, 2), 
+			#energy_prime_multicores_rel = round(energy_prime_multicores - energy_prime, 2), 
+			energy_mat_mul_rel = round(energy_mat_mul - energy_prime_rel, 2),
+			energy_mat_mul_float_rel = round(energy_mat_mul_float - energy_mat_mul, 2),
+			energy_mat_mul_double_rel = round(energy_mat_mul_double - energy_mat_mul_float, 2), 
+			total_energy = energy_mat_mul_double
+		)
+		
+	energy_consumption_table <- energy_consumption_table %>%
+		mutate(
+			gain_baseline = ((total_energy - energy_consumption_table[energy_consumption_table$gp == baseline_name, ]$total_energy) / energy_consumption_table[energy_consumption_table$gp == baseline_name, ]$total_energy) * 100
+		)
+	
+	energy_consumption_table <- energy_consumption_table %>%
+		rename(
+			"Clock" = clock_source,
+			"VREG" = vreg_output,
+			"Freq" = clock_freq,
+			"Prime (J)" = energy_prime_rel,
+			#"Prime multicores (J)" = energy_prime_multicores_rel,
+			"Mat mul int (J)" = energy_mat_mul_rel,
+			"Mat mul float (J)" = energy_mat_mul_float_rel,
+			"Mat mul double (J)" = energy_mat_mul_double_rel,
+			"Total energy (J)" = total_energy,
+			"% baseline (%)" = gain_baseline
+		)
+
+	# Color table
+	## default template + baseline in grey
+	content <- ifelse(energy_consumption_table$gp != baseline_name, ifelse(energy_consumption_table$row_num %% 2 == 0, "grey90", "grey95"), "grey75")
+	#content <- ifelse(energy_consumption_table$row_num == 0, "grey90", "grey95")
+	
+	## table per expe
+	#colors <- c("#AAAAAA", "#EEB8FF", "#B8B8FF", "#FFDC8A")
+	#content <- rep(colors, each = ncol(energy_consumption_table))
+	#
+	## summary table
+	#colors <- c("#AAAAAA", "#EEB8FF", "#B8B8FF", "#FFDC8A")
+	#content <- rep(colors, each = ncol(energy_consumption_table))
+	
+	fill_matrix <- matrix(
+		content,
+		nrow = nrow(energy_consumption_table),
+		ncol = ncol(energy_consumption_table)
+	)
+	fill_matrix[, which(names(energy_consumption_table) == "% baseline (%)")-2] <-  # -2 because we are removing columns later, shifting the colors of matrix to the left 
+		ifelse(energy_consumption_table$`% baseline (%)` > 0, "#ffcccc",
+					 ifelse(energy_consumption_table$`% baseline (%)` < 0, "#ccffcc", fill_matrix))
+	tt <- ttheme_default(core = list(bg_params = list(fill = fill_matrix)))
+		
+	energy_consumption_table <- energy_consumption_table %>% select(-row_num, -gp) 
+	table_grob <- tableGrob(energy_consumption_table, rows = NULL, theme = tt)
+	table_with_title <- arrangeGrob(
+		textGrob(
+			"Energy consumption for each benchmark according to the configuration",
+			gp = gpar(fontsize = 14)
+		),
+		table_grob,
+		heights = c(0.1, 0.2)
+	)
+	pdf(paste(folder, pdf_name, "_table.pdf", sep=""), width = 15)
+	grid.table(energy_consumption_table, rows = NULL, theme = tt)
+
+	#p2 <- p2 + guides(color = "none", fill = "none", linetype = "none")
+	#combined_plot <- (p1 + p2) + plot_layout(guides = "collect") & theme(legend.position = "top")
+	#combined_plot <- (p1 + plot_layout(guides = "collect") & theme(legend.position = "top")) / wrap_elements(table_with_title) + plot_layout(heights = c(2,1))
+	#combined_plot <- p1 + plot_layout(guides = "collect") & theme(legend.position = "top")
+
+	# write.csv(power_summary, paste(folder, "power_summary.csv", sep=""))
+	# write.csv(energy_consumption, paste(folder, "energy_consumption.csv", sep=""))
+	
+	# ggsave(paste(folder, pdf_name, ".pdf", sep=""), plot=combined_plot, width = 8, height = 6)
+}
+
