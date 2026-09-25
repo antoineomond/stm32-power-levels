@@ -84,23 +84,23 @@ for(expe in c(baseline_f, minimum_freq, minimum_vreg)) {
 	power_summary <- df_expe %>%
 		#group_by(clock_source, pll_vco_freq, clock_freq) %>%
 		group_by(clock_source, vreg_output, clock_freq) %>%
-		summarise(power_median = median(current_sample, na.rm = TRUE))
+		summarise(power_median = median(power_sample, na.rm = TRUE))
 
 	myColors <- c("black", "purple", "blue", "orange", "yellow", "green", "grey", "pink", "brown")
 	names(myColors) <- levels(df_expe$gp)
 	mtimestamp <- max(df_expe$current_timestamp, na.rm = TRUE)
-	p1 <- ggplot(df_expe , aes(x = current_timestamp, y = current_sample, color=gp, group=gp)) + 
+	p1 <- ggplot(df_expe , aes(x = current_timestamp, y = power_sample, color=gp, group=gp)) + 
 		geom_line(na.rm = TRUE) +
 		geom_hline(data = power_summary, aes(yintercept = power_median), linetype = "dashed") +
-		geom_label_repel(data = power_summary, aes(x=mtimestamp*1.05, y = power_median, label = paste(round(power_median,2), "mA")), hjust = "left", show.legend = FALSE, inherit.aes = FALSE, direction = "y") +
+		geom_label_repel(data = power_summary, aes(x=mtimestamp*1.05, y = power_median, label = paste(round(power_median,2), "mW")), hjust = "left", show.legend = FALSE, inherit.aes = FALSE, direction = "y") +
 		scale_x_continuous(expand = expansion(mult = c(0, 0.3))) +
 		#scale_y_continuous(n.breaks=15, limits = c(1, 18)) +
 		scale_y_continuous(n.breaks=15) +
-		labs(x = "Timestamp in seconds", y = "Current drawn in mA", title = graph_title) +
+		labs(x = "Timestamp in seconds", y = "Power usage in mW", title = graph_title) +
 		scale_colour_manual(name = "Configuration:", values = myColors, labels = res_mapping) +
-		guides(color = guide_legend(nrow = 2, byrow = TRUE)) + 
+		guides(color = guide_legend(nrow = 1, byrow = TRUE)) + 
 		theme(
-			aspect.ratio = 0.8,
+			aspect.ratio = 0.4,
 			plot.title = element_text(hjust = 0.5),
 			plot.subtitle = element_text(hjust = 0.5),
 			plot.margin = margin(0, 0, 0, 0, "pt")
@@ -219,6 +219,6 @@ for(expe in c(baseline_f, minimum_freq, minimum_vreg)) {
 	write.csv(power_summary, paste(folder, "power_summary.csv", sep=""))
 	write.csv(energy_consumption, paste(folder, "energy_consumption.csv", sep=""))
 	
-	ggsave(paste(folder, pdf_name, ".pdf", sep=""), plot=combined_plot, width = 8, height = 7)
+	ggsave(paste(folder, pdf_name, ".pdf", sep=""), plot=combined_plot, width = 8, height = 6)
 }
 

@@ -7,4 +7,4 @@ compile_commands.json
 results/*
 !results/plot.r
 !results/configurations.csv
-!results/paper
+!results/paper_*
